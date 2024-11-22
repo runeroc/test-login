@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тестовая авторизация</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2 {
+            text-align: center;
+        }
+
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Авторизация</h1>
+        <div id="register-form">
+            <h2>Регистрация</h2>
+            <input type="text" id="reg-username" placeholder="Имя пользователя" required>
+            <input type="password" id="reg-password" placeholder="Пароль" required>
+            <button onclick="register()">Зарегистрироваться</button>
+        </div>
+
+        <div id="login-form" class="hidden">
+            <h2>Вход</h2>
+            <input type="text" id="login-username" placeholder="Имя пользователя" required>
+            <input type="password" id="login-password" placeholder="Пароль" required>
+            <button onclick="login()">Войти</button>
+        </div>
+
+        <div id="dashboard" class="hidden">
+            <h2>Добро пожаловать, <span id="user-name"></span>!</h2>
+            <button onclick="logout()">Выйти</button>
+        </div>
+    </div>
+
+    <script>
+        // Проверяем, есть ли уже текущий пользователь
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+
+        if (currentUser) {
+            showDashboard(currentUser);
+        } else {
+            showRegisterForm();
+        }
+
+        // Регистрация нового пользователя
+        function register() {
+            const username = document.getElementById('reg-username').value.trim();
+            const password = document.getElementById('reg-password').value.trim();
+
+            if (!username || !password) {
+                alert('Введите имя пользователя и пароль!');
+                return;
+            }
+
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+
+            // Проверяем, есть ли уже пользователь с таким именем
+            if (users.some(user => user.username === username)) {
+                alert('Пользователь с таким именем уже существует!');
+                return;
+            }
+
+            // Сохраняем нового пользователя
+            users.push({ username, password });
+            localStorage.setItem('users', JSON.stringify(users));
+
+            alert('Регистрация успешна! Теперь войдите в систему.');
+            showLoginForm();
+        }
+
+        // Вход в систему
+        function login() {
+            const username = document.getElementById('login-username').value.trim();
+            const password = document.getElementById('login-password').value.trim();
+
+            if (!username || !password) {
+                alert('Введите имя пользователя и пароль!');
+                return;
+            }
+
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+
+            // Ищем пользователя с указанными данными
+            const user = users.find(u => u.username === username && u.password === password);
+
+            if (user) {
+                // Сохраняем текущего пользователя
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                showDashboard(user);
+            } else {
+                alert('Неправильное имя пользователя или пароль!');
+            }
+        }
+
+        // Выход из системы
+        function logout() {
+            localStorage.removeItem('currentUser');
+            showRegisterForm();
+        }
+
+        // Показать форму регистрации
+        function showRegisterForm() {
+            document.getElementById('register-form').classList.remove('hidden');
+            document.getElementById('login-form').classList.add('hidden');
+            document.getElementById('dashboard').classList.add('hidden');
+        }
+
+        // Показать форму входа
+        function showLoginForm() {
+            document.getElementById('register-form').classList.add('hidden');
+            document.getElementById('login-form').classList.remove('hidden');
+            document.getElementById('dashboard').classList.add('hidden');
+        }
+
+        // Показать личный кабинет
+        function showDashboard(user) {
+            document.getElementById('register-form').classList.add('hidden');
+            document.getElementById('login-form').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            document.getElementById('user-name').textContent = user.username;
+        }
+    </script>
+</body>
+</html>
